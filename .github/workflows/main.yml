@@ -159,6 +159,11 @@ jobs:
       image: getcapsule/sandbox
       options: --privileged
 
+    env:
+      # newer rustc defaults to rust-lld, which does not pick up the DPDK
+      # library paths the sandbox container provides to gcc; opt out.
+      RUSTFLAGS: -C linker-features=-lld
+
     steps:
       - name: install curl
         run: |
@@ -244,7 +249,7 @@ jobs:
             -w /home/capsule/examples/pktdump \
             -v /dev/hugepages:/dev/hugepages \
             -v `pwd`:/home/capsule \
-            --env RUSTFLAGS="-Z sanitizer=address" \
+            --env RUSTFLAGS="-Z sanitizer=address -C linker-features=-lld" \
             --env ASAN_OPTIONS=detect_leaks=1 \
             --env LSAN_OPTIONS=suppressions=suppressions.txt \
             getcapsule/sandbox \
@@ -258,6 +263,11 @@ jobs:
     container:
       image: getcapsule/sandbox
       options: --privileged
+
+    env:
+      # newer rustc defaults to rust-lld, which does not pick up the DPDK
+      # library paths the sandbox container provides to gcc; opt out.
+      RUSTFLAGS: -C linker-features=-lld
 
     steps:
       - uses: actions/checkout@v2

@@ -25,6 +25,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(non_snake_case)]
+// bindgen's `derive_partialeq` generates comparisons of C function
+// pointers, which newer rustc flags as unpredictable.
+#![allow(unpredictable_function_pointer_comparisons)]
 #![cfg(target_os = "linux")]
 
 #[cfg(not(feature = "rustdoc"))]
