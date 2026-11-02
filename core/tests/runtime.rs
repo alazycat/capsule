@@ -25,7 +25,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use capsule::batch::{Pipeline, Poll};
+use capsule::batch::{Batch, Pipeline, Poll};
 use capsule::config::RuntimeConfig;
 use capsule::{PortQueue, Runtime};
 
