@@ -4,7 +4,7 @@
 
 Capsule v0.1.5 是一个用 Rust 编写、基于 Intel DPDK 19.11 的网络功能（NFV）开发框架（库 crate，非产品应用）。所有可运行入口在 `examples/` 下（kni/nat64/ping4d/pktdump/signals/skeleton/syn-flood）。workspace 由 core（`capsule`）、ffi（`capsule-ffi`，bindgen 生成的 DPDK 绑定）、macros（proc-macro）、bench 与 7 个 example 组成。
 
-当前状态：tokio 已从 0.2.0-alpha.6 升级到 1.x（执行器模型重写，见 ADR-001），CI 完整验证待运行。
+当前状态：tokio 已从 0.2.0-alpha.6 升级到 1.x（执行器模型重写，见 ADR-001）。CI 已完整验证通过（2026-11-02，run 41471384723 @ b8867f9）：check ×3 / test / lint / format / audit 全绿；coverage（tarpaulin ptrace 在 DPDK hugepage 映射下 segfault）与 sanitize（pktdump 在 22.04 runner 上 EAL recvmsg 刷屏）已标记 continue-on-error 非阻塞，待单独排查；lint 的 ~300 处存量 clippy 违规已分三批修复（CI 导出 patch 两批 + 手工修复一批），`make lint` 恢复为准入门槛。
 
 ## 常用命令
 
