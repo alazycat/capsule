@@ -249,15 +249,6 @@ jobs:
       options: --privileged
 
     steps:
-      # git is needed for `git diff` below; actions/checkout otherwise
-      # falls back to a REST download without a git repository.
-      - name: install git
-        run: |
-          # the sandbox container is Debian buster based, which has been
-          # archived; point apt at archive.debian.org and skip expiry checks.
-          sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list
-          apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y git
-
       - uses: actions/checkout@v2
 
       # the sandbox container ships an old cargo that cannot parse newer
@@ -268,36 +259,8 @@ jobs:
           override: true
           components: clippy
 
-      # TEMPORARY: the legacy codebase predates the current clippy; instead
-      # of hand-fixing ~300 style violations, auto-apply the
-      # machine-applicable suggestions and export them as a patch for
-      # review. Revert to `make lint` once the patch has been merged.
-      - name: cargo-clippy-fix
-        shell: bash
-        run: |
-          # the repository is owned by the runner user, not the container
-          # root; git refuses to operate on it otherwise.
-          git config --global --add safe.directory '*' || true
-          # actions/checkout may fall back to a REST download without a
-          # .git directory; establish a baseline commit so `git diff` can
-          # export the fixes either way.
-          if ! git rev-parse --git-dir >/dev/null 2>&1; then
-            git init -q .
-            git add -A
-            git -c user.name=ci -c user.email=ci@example.com commit -qm baseline
-          fi
-          pushd core && cargo clippy --fix --allow-dirty --all-targets --features full; popd
-          cargo clippy --fix --allow-dirty --all-targets --workspace --exclude capsule || true
-          git diff -- core ffi macros bench examples > clippy-fix.patch
-          git diff --stat
-
-      - name: upload-clippy-fix-patch
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: clippy-fix-patch
-          path: clippy-fix.patch
-          if-no-files-found: warn
+      - name: cargo-lint
+        run: make lint
 
   sanitize:
     runs-on: ubuntu-22.04
