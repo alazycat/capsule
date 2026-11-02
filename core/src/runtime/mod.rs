@@ -437,7 +437,7 @@ impl Runtime {
     pub fn add_periodic_task_to_core<F>(
         &mut self,
         core: usize,
-        mut task: F,
+        task: F,
         dur: Duration,
     ) -> Result<&mut Self>
     where

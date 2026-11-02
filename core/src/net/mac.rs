@@ -69,7 +69,7 @@ impl FromStr for MacAddr {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let u8s = s
-            .split(|c| c == ':' || c == '-')
+            .split([':', '-'])
             .map(|s| u8::from_str_radix(s, 16))
             .filter_map(Result::ok)
             .collect::<Vec<_>>();

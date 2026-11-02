@@ -630,8 +630,8 @@ mod tests {
         assert_eq!(5, ipv4.ihl());
         assert_eq!(38, ipv4.total_length());
         assert_eq!(43849, ipv4.identification());
-        assert_eq!(true, ipv4.dont_fragment());
-        assert_eq!(false, ipv4.more_fragments());
+        assert!(ipv4.dont_fragment());
+        assert!(!ipv4.more_fragments());
         assert_eq!(0, ipv4.fragment_offset());
         assert_eq!(0, ipv4.dscp());
         assert_eq!(0, ipv4.ecn());
@@ -660,18 +660,18 @@ mod tests {
         ipv4.set_ihl(ipv4.ihl());
 
         // Flags
-        assert_eq!(true, ipv4.dont_fragment());
-        assert_eq!(false, ipv4.more_fragments());
+        assert!(ipv4.dont_fragment());
+        assert!(!ipv4.more_fragments());
 
         ipv4.unset_dont_fragment();
-        assert_eq!(false, ipv4.dont_fragment());
+        assert!(!ipv4.dont_fragment());
         ipv4.set_dont_fragment();
-        assert_eq!(true, ipv4.dont_fragment());
+        assert!(ipv4.dont_fragment());
 
         ipv4.set_more_fragments();
-        assert_eq!(true, ipv4.more_fragments());
+        assert!(ipv4.more_fragments());
         ipv4.unset_more_fragments();
-        assert_eq!(false, ipv4.more_fragments());
+        assert!(!ipv4.more_fragments());
 
         ipv4.set_fragment_offset(5);
         assert_eq!(5, ipv4.fragment_offset());

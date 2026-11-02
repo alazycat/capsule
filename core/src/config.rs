@@ -442,7 +442,7 @@ mod tests {
 
         let config: RuntimeConfig = toml::from_str(CONFIG).unwrap();
 
-        assert_eq!(false, config.secondary);
+        assert!(!config.secondary);
         assert_eq!(None, config.app_group);
         assert!(config.cores.is_empty());
         assert_eq!(None, config.dpdk_args);
@@ -451,9 +451,9 @@ mod tests {
         assert_eq!(None, config.ports[0].args);
         assert_eq!(default_port_rxd(), config.ports[0].rxd);
         assert_eq!(default_port_txd(), config.ports[0].txd);
-        assert_eq!(false, config.ports[0].promiscuous);
+        assert!(!config.ports[0].promiscuous);
         assert_eq!(default_multicast_mode(), config.ports[0].multicast);
-        assert_eq!(false, config.ports[0].kni);
+        assert!(!config.ports[0].kni);
     }
 
     #[test]

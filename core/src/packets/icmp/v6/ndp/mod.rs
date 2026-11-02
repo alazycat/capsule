@@ -385,7 +385,7 @@ impl MutableNdpOptionsIterator<'_> {
     #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Result<Option<MutableNdpOption<'_>>> {
         if self.mbuf.data_len() > self.offset {
-            match MutableNdpOption::new(&mut self.mbuf, self.offset) {
+            match MutableNdpOption::new(self.mbuf, self.offset) {
                 Ok(option) => {
                     // advances the offset to the next option
                     self.offset = option.end_offset();

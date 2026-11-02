@@ -174,7 +174,7 @@ impl fmt::Debug for CoreId {
 }
 
 thread_local! {
-    static CURRENT_CORE_ID: Cell<CoreId> = Cell::new(CoreId::ANY);
+    static CURRENT_CORE_ID: Cell<CoreId> = const { Cell::new(CoreId::ANY) };
 }
 
 /// Initializes the Environment Abstraction Layer (EAL).

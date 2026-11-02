@@ -53,9 +53,8 @@ where
 
     #[inline]
     fn next(&mut self) -> Option<Disposition<Self::Item>> {
-        self.batch.next().map(|disp| {
-            (self.f)(&disp);
-            disp
+        self.batch.next().inspect(|disp| {
+            (self.f)(disp);
         })
     }
 }

@@ -112,7 +112,7 @@ impl StrategyMap {
     }
 
     fn checked_value<T: Arbitrary + Clone + 'static>(&self, key: &field) -> Option<T> {
-        if let Some(ref v) = self.0.get(key) {
+        if let Some(v) = self.0.get(key) {
             let v = v
                 .downcast_ref::<T>()
                 .unwrap_or_else(|| panic!("value doesn't match type for field '{:?}'", key));
@@ -299,7 +299,7 @@ fn srh<E: Debug + Ipv6Packet>(
             packet.set_segments(&segments).unwrap();
             packet.set_tag(tag);
             packet.set_next_header(next_header);
-            packet.set_segments_left(segments_left as u8);
+            packet.set_segments_left(segments_left);
             packet
         },
     )

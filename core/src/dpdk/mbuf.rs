@@ -26,7 +26,6 @@ use std::fmt;
 use std::mem;
 use std::os::raw;
 use std::ptr::{self, NonNull};
-use std::slice;
 use thiserror::Error;
 
 /// A trait for returning the size of a type in bytes.
@@ -374,7 +373,7 @@ impl Mbuf {
 
         unsafe {
             let item0 = self.data_address(offset) as *mut T;
-            let slice = slice::from_raw_parts_mut(item0, count) as *mut [T];
+            let slice = std::ptr::slice_from_raw_parts_mut(item0, count);
             Ok(NonNull::new_unchecked(slice))
         }
     }

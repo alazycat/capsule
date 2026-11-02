@@ -67,9 +67,8 @@ impl Pcap {
                 .into_result(|_| PcapError::new("Cannot create packet capture handle."))?;
             let dumper = ffi::pcap_dump_open(handle.as_ptr(), path.into_cstring().as_ptr())
                 .into_result(|_| PcapError::get_error(handle))
-                .map_err(|err| {
+                .inspect_err(|_err| {
                     ffi::pcap_close(handle.as_ptr());
-                    err
                 })?;
 
             debug!("PCAP file {} created", path);
@@ -94,9 +93,8 @@ impl Pcap {
                 .into_result(|_| PcapError::new("Cannot create packet capture handle."))?;
             let dumper = ffi::pcap_dump_open_append(handle.as_ptr(), path.into_cstring().as_ptr())
                 .into_result(|_| PcapError::get_error(handle))
-                .map_err(|err| {
+                .inspect_err(|_err| {
                     ffi::pcap_close(handle.as_ptr());
-                    err
                 })?;
             Ok(Pcap {
                 path: path.to_string(),
@@ -237,7 +235,7 @@ unsafe extern "C" fn append_and_write_tx(
 /// file(s).
 fn append_and_write(port: &str, tx_or_rx: &str, ptrs: &[*mut ffi::rte_mbuf]) {
     let path = format_pcap_file(port, CoreId::current().raw(), tx_or_rx);
-    if let Err(err) = Pcap::append(path.as_str()).and_then(|pcap| unsafe { pcap.write(&ptrs) }) {
+    if let Err(err) = Pcap::append(path.as_str()).and_then(|pcap| unsafe { pcap.write(ptrs) }) {
         error!(
             message = "Cannot write/append to pcap file.",
             pcap = path.as_str(),

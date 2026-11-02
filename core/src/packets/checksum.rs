@@ -148,7 +148,7 @@ pub fn compute(pseudo_header_sum: u16, payload: &[u8]) -> u16 {
     let mut checksum = u32::from(pseudo_header_sum);
 
     // odd # of bytes, we add the last byte with padding separately
-    if len % 2 > 0 {
+    if !len.is_multiple_of(2) {
         checksum += u32::from(payload[len - 1]) << 8;
         data = &payload[..(len - 1)];
     }

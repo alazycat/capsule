@@ -124,7 +124,7 @@ thread_local! {
     ///
     /// It's set when the core is first initialized. New `Mbuf` is allocated
     /// from this `Mempool` when executed on this core.
-    pub static MEMPOOL: Cell<*mut ffi::rte_mempool> = Cell::new(ptr::null_mut());
+    pub static MEMPOOL: Cell<*mut ffi::rte_mempool> = const { Cell::new(ptr::null_mut()) };
 }
 
 /// Error indicating the `Mempool` is not found or is exhaused.
@@ -138,7 +138,7 @@ pub(crate) enum MempoolError {
 }
 
 /// A specialized hash map of `SocketId` to `&mut Mempool`.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(crate) struct MempoolMap<'a> {
     inner: HashMap<SocketId, &'a mut Mempool>,
 }
@@ -168,13 +168,5 @@ impl<'a> MempoolMap<'a> {
             .get_mut(&socket_id)
             .ok_or_else(|| MempoolError::NotFound(socket_id).into())
             .map(|pool| pool.raw_mut())
-    }
-}
-
-impl<'a> Default for MempoolMap<'a> {
-    fn default() -> MempoolMap<'a> {
-        MempoolMap {
-            inner: HashMap::new(),
-        }
     }
 }

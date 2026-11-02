@@ -351,7 +351,7 @@ impl Port {
 impl fmt::Debug for Port {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let info = self.dev_info;
-        f.debug_struct(&self.name())
+        f.debug_struct(self.name())
             .field("device", &self.device)
             .field("port", &self.id.0)
             .field("mac", &format_args!("\"{}\"", self.mac_addr()))
