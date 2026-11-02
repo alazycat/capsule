@@ -133,7 +133,7 @@ impl KniTxQueue {
     pub fn transmit(&mut self, packets: Vec<Mbuf>) {
         if let Err(err) = self.tx_enque.send(packets) {
             warn!(message = "failed to send to kni tx queue.");
-            Mbuf::free_bulk(err.into_inner());
+            Mbuf::free_bulk(err.0);
         }
     }
 }

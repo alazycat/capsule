@@ -161,7 +161,11 @@ jobs:
 
     steps:
       - name: install curl
-        run: apt-get update && apt-get install -y curl
+        run: |
+          # the sandbox container is Debian buster based, which has been
+          # archived; point apt at archive.debian.org and skip expiry checks.
+          sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list
+          apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y curl
 
       - uses: actions/checkout@v2
 
@@ -212,6 +216,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # the sandbox container ships an old cargo that cannot parse newer
+      # crate manifests (e.g. getrandom 0.4); pin a current stable instead.
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
       - name: cargo-clippy
         run: make lint
 
@@ -249,6 +260,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      # the sandbox container ships an old cargo that cannot parse newer
+      # crate manifests (e.g. getrandom 0.4); pin a current stable instead.
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
 
       - name: cargo-test
         run: make test
