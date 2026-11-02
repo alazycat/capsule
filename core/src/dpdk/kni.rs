@@ -25,8 +25,8 @@ use crate::metrics::{labels, Counter, SINK};
 use crate::net::MacAddr;
 use crate::{debug, error, warn};
 use anyhow::Result;
-use futures::{future, Future, StreamExt};
 use std::cmp;
+use std::future::Future;
 use std::mem;
 use std::os::raw;
 use std::ptr::{self, NonNull};
@@ -221,10 +221,12 @@ impl KniTx {
 
     /// Converts the TX handle into a spawnable pipeline.
     pub(crate) fn into_pipeline(mut self) -> impl Future<Output = ()> {
-        self.tx_deque.take().unwrap().for_each(move |packets| {
-            self.transmit(packets);
-            future::ready(())
-        })
+        async move {
+            let mut tx_deque = self.tx_deque.take().unwrap();
+            while let Some(packets) = tx_deque.recv().await {
+                self.transmit(packets);
+            }
+        }
     }
 }
 

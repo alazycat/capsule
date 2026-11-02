@@ -22,10 +22,9 @@ use crate::dpdk::CoreId;
 use crate::metrics::{labels, Counter, SINK};
 use crate::packets::Packet;
 use crate::Mbuf;
-use futures::{future, Future};
+use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use tokio_executor::current_thread;
 
 /// Creates a new pipeline counter.
 #[cfg(feature = "metrics")]
@@ -129,10 +128,9 @@ impl<B: Batch + Unpin, Tx: PacketTx + Unpin> Future for Send<B, Tx> {
         // executes a batch of packets.
         self.get_mut().run();
 
-        // now schedules the waker as a future and yields the core so other
-        // futures have a chance to run.
-        let waker = cx.waker().clone();
-        current_thread::spawn(future::lazy(|_| waker.wake()));
+        // schedules the waker so the executor will re-poll this task. this
+        // yields the core so other futures have a chance to run in between.
+        cx.waker().wake_by_ref();
 
         Poll::Pending
     }

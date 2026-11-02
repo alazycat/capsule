@@ -27,16 +27,12 @@ use crate::dpdk::{
 };
 use crate::{debug, ensure, info};
 use anyhow::Result;
-use futures::{future, stream, StreamExt};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::mem::ManuallyDrop;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
-use tokio_executor::current_thread;
-use tokio_net::driver;
-use tokio_net::signal::unix::{self, SignalKind};
-use tokio_timer::{timer, Interval};
+use std::time::Duration;
+use tokio::signal::unix::{self, SignalKind};
 
 /// Supported [Unix signals].
 ///
@@ -56,10 +52,9 @@ pub enum UnixSignal {
     /// be used.
     SIGINT = libc::SIGINT as isize,
     /// This signal is sent to a process to request its termination. Unlike the
-    /// `SIGKILL` signal, it can be caught and interpreted or ignored by the
-    /// process. This allows the process to perform nice termination releasing
-    /// resources and saving state if appropriate. `SIGINT` is nearly identical
-    /// to `SIGTERM`.
+    /// `SIGKILL` signal, it can be caught and interpreted or ignored. The
+    /// process should perform nice termination releasing resources and saving
+    /// state if appropriate. `SIGINT` is nearly identical to `SIGTERM`.
     SIGTERM = libc::SIGTERM as isize,
 }
 
@@ -244,15 +239,17 @@ impl Runtime {
         for (core_id, port_q) in port.queues() {
             let f = f.clone();
             let port_q = port_q.clone();
-            let thread = &self.get_core(*core_id)?.thread;
+            let install = &self.get_core(*core_id)?.install;
 
-            // spawns the bootstrap. we want the bootstrapping to execute on the
-            // target core instead of the master core. that way the actual task
-            // is spawned locally and the type bounds are less restricting.
-            thread.spawn(future::lazy(move |_| {
+            // queues the installer to execute on the target core instead of
+            // the master core. that way the actual task is created and
+            // spawned locally and the type bounds are less restricting.
+            install.send(Box::new(move || {
                 let fut = f(port_q);
-                debug!("spawned pipeline {}.", fut.name());
-                current_thread::spawn(fut);
+                Box::pin(async move {
+                    debug!("spawned pipeline {}.", fut.name());
+                    fut.await
+                })
             }))?;
 
             debug!("installed pipeline on port_q for {:?}.", core_id);
@@ -306,14 +303,16 @@ impl Runtime {
         let port = self.get_port(port)?;
         let core_id = port.queues().keys().last().unwrap();
         let port_q = port.queues()[core_id].clone();
-        let thread = &self.get_core(*core_id)?.thread;
+        let install = &self.get_core(*core_id)?.install;
 
-        // spawns the bootstrap. we want the bootstrapping to execute on the
-        // target core instead of the master core.
-        thread.spawn(future::lazy(move |_| {
+        // queues the installer to execute on the target core instead of the
+        // master core.
+        install.send(Box::new(move || {
             let fut = installer(kni_rx, port_q);
-            debug!("spawned kni rx pipeline {}.", fut.name());
-            current_thread::spawn(fut);
+            Box::pin(async move {
+                debug!("spawned kni rx pipeline {}.", fut.name());
+                fut.await
+            })
         }))?;
 
         info!("installed kni rx pipeline for port {}.", port.name());
@@ -347,15 +346,17 @@ impl Runtime {
         F: FnOnce(HashMap<String, PortQueue>) -> T + Send + Sync + 'static,
     {
         let core_id = CoreId::new(core);
-        let thread = &self.get_core(core_id)?.thread;
+        let install = &self.get_core(core_id)?.install;
         let port_qs = self.get_port_qs(core_id)?;
 
-        // spawns the bootstrap. we want the bootstrapping to execute on the
-        // target core instead of the master core.
-        thread.spawn(future::lazy(move |_| {
+        // queues the installer to execute on the target core instead of the
+        // master core.
+        install.send(Box::new(move || {
             let fut = installer(port_qs);
-            debug!("spawned pipeline {}.", fut.name());
-            current_thread::spawn(fut);
+            Box::pin(async move {
+                debug!("spawned pipeline {}.", fut.name());
+                fut.await
+            })
         }))?;
 
         info!("installed pipeline for {:?}.", core_id);
@@ -398,20 +399,22 @@ impl Runtime {
         F: FnOnce(HashMap<String, PortQueue>) -> T + Send + Sync + 'static,
     {
         let core_id = CoreId::new(core);
-        let thread = &self.get_core(core_id)?.thread;
+        let install = &self.get_core(core_id)?.install;
         let port_qs = self.get_port_qs(core_id)?;
 
-        // spawns the bootstrap. we want the bootstrapping to execute on the
-        // target core instead of the master core so the periodic task is
-        // associated with the correct timer instance.
-        thread.spawn(future::lazy(move |_| {
-            let mut pipeline = installer(port_qs);
-            debug!("spawned periodic pipeline {}.", pipeline.name());
-            let fut = Interval::new_interval(dur).for_each(move |_| {
-                pipeline.run_once();
-                future::ready(())
-            });
-            current_thread::spawn(fut);
+        // queues the installer to execute on the target core instead of the
+        // master core so the periodic task is associated with the correct
+        // timer instance.
+        install.send(Box::new(move || {
+            Box::pin(async move {
+                let mut pipeline = installer(port_qs);
+                debug!("spawned periodic pipeline {}.", pipeline.name());
+                let mut interval = tokio::time::interval(dur);
+                loop {
+                    interval.tick().await;
+                    pipeline.run_once();
+                }
+            })
         }))?;
 
         info!("installed periodic pipeline for {:?}.", core_id);
@@ -441,18 +444,20 @@ impl Runtime {
         F: FnMut() + Send + Sync + 'static,
     {
         let core_id = CoreId::new(core);
-        let thread = &self.get_core(core_id)?.thread;
+        let install = &self.get_core(core_id)?.install;
 
-        // spawns the bootstrap. we want the bootstrapping to execute on the
-        // target core instead of the master core so the periodic task is
-        // associated with the correct timer instance.
-        thread.spawn(future::lazy(move |_| {
-            let fut = Interval::new_interval(dur).for_each(move |_| {
-                task();
-                future::ready(())
-            });
-            debug!("spawned periodic task.");
-            current_thread::spawn(fut);
+        // queues the installer to execute on the target core instead of the
+        // master core so the periodic task is associated with the correct
+        // timer instance.
+        install.send(Box::new(move || {
+            Box::pin(async move {
+                let mut task = task;
+                let mut interval = tokio::time::interval(dur);
+                loop {
+                    interval.tick().await;
+                    task();
+                }
+            })
         }))?;
 
         info!("installed periodic task for {:?}.", core_id);
@@ -465,52 +470,47 @@ impl Runtime {
     /// This mode is useful for running integration tests. The timeout
     /// duration can be set in `RuntimeSettings`.
     fn wait_for_timeout(&mut self, timeout: Duration) {
-        let MasterExecutor {
-            ref timer,
-            ref mut thread,
-            ..
-        } = self.core_map.master_core;
-
-        let when = Instant::now() + timeout;
-        let delay = timer.delay(when);
+        let MasterExecutor { runtime, local, .. } = &self.core_map.master_core;
 
         debug!("waiting for {:?}...", timeout);
-        let _timer = timer::set_default(&timer);
-        thread.block_on(delay);
+        runtime.block_on(local.run_until(async {
+            tokio::time::sleep(timeout).await;
+        }));
         info!("timed out after {:?}.", timeout);
     }
 
     /// Blocks the main thread until receives a signal to terminate.
     fn wait_for_signal(&mut self) -> Result<()> {
-        let sighup = unix::signal(SignalKind::hangup())?.map(|_| UnixSignal::SIGHUP);
-        let sigint = unix::signal(SignalKind::interrupt())?.map(|_| UnixSignal::SIGINT);
-        let sigterm = unix::signal(SignalKind::terminate())?.map(|_| UnixSignal::SIGTERM);
-
-        // combines the streams together
-        let stream = stream::select(stream::select(sighup, sigint), sigterm);
-
-        // passes each signal through the `on_signal` closure, and discard
-        // any that shouldn't stop the execution.
+        let MasterExecutor { runtime, local, .. } = &self.core_map.master_core;
         let f = self.on_signal.clone();
-        let mut stream = stream.filter(|&signal| future::ready(f(signal)));
 
-        let MasterExecutor {
-            ref reactor,
-            ref timer,
-            ref mut thread,
-            ..
-        } = self.core_map.master_core;
+        // the signal listeners are created inside the runtime context so
+        // they register with the master core's IO driver. each signal is
+        // passed through the `on_signal` closure, and the ones that
+        // shouldn't stop the execution are discarded.
+        let result: Result<()> = runtime.block_on(local.run_until(async {
+            let mut sighup = unix::signal(SignalKind::hangup())?;
+            let mut sigint = unix::signal(SignalKind::interrupt())?;
+            let mut sigterm = unix::signal(SignalKind::terminate())?;
 
-        // sets the reactor so we receive the signals and runs the future
-        // on the master core. the execution stops on the first signal that
-        // wasn't filtered out.
-        debug!("waiting for a Unix signal...");
-        let _guard = driver::set_default(&reactor);
-        let _timer = timer::set_default(&timer);
-        let _ = thread.block_on(stream.next());
+            loop {
+                let signal = tokio::select! {
+                    _ = sighup.recv() => UnixSignal::SIGHUP,
+                    _ = sigint.recv() => UnixSignal::SIGINT,
+                    _ = sigterm.recv() => UnixSignal::SIGTERM,
+                };
+
+                if f(signal) {
+                    break;
+                }
+            }
+
+            Ok(())
+        }));
+
         info!("signaled to stop.");
 
-        Ok(())
+        result
     }
 
     /// Installs the KNI TX pipelines.
@@ -532,8 +532,8 @@ impl Runtime {
 
         // spawns all the pipelines.
         for (core_id, kni_tx) in map.into_iter() {
-            let thread = &self.get_core(core_id)?.thread;
-            thread.spawn(kni_tx.into_pipeline())?;
+            let install = &self.get_core(core_id)?.install;
+            install.send(Box::new(move || Box::pin(kni_tx.into_pipeline())))?;
 
             info!("installed kni tx pipeline on {:?}.", core_id);
         }

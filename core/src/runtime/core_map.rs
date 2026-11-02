@@ -17,18 +17,27 @@
 */
 
 use crate::dpdk::{CoreId, Mempool, MempoolMap, MEMPOOL};
-use crate::{debug, error, ffi, info};
+use crate::{debug, error, info};
 use anyhow::Result;
-use futures::Future;
 use std::collections::{HashMap, HashSet};
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::mpsc::{self, Receiver, SyncSender};
 use std::thread::{self, JoinHandle};
 use thiserror::Error;
+use tokio::runtime::{Builder, Runtime};
+use tokio::sync::mpsc as tokio_mpsc;
 use tokio::sync::oneshot;
-use tokio_executor::current_thread::{self, CurrentThread};
-use tokio_executor::park::ParkThread;
-use tokio_net::driver::{self, Reactor};
-use tokio_timer::timer::{self, Timer};
+use tokio::task::LocalSet;
+
+/// A boxed future that does not need to be `Send`. It is always spawned onto
+/// the thread that created it.
+pub(crate) type LocalTask = Pin<Box<dyn Future<Output = ()>>>;
+
+/// A job that creates and returns a `LocalTask` when executed on the target
+/// core. The job itself must be `Send` so it can be queued from the master
+/// thread, but the task it creates runs locally on the target core.
+pub(crate) type Job = Box<dyn FnOnce() -> LocalTask + Send>;
 
 /// A sync-channel based park handle.
 ///
@@ -119,33 +128,42 @@ impl ShutdownTrigger {
 
 /// A abstraction used to interact with the master/main thread.
 ///
-/// This is an additional handle to the master thread for performing tasks.
-/// Use this `thread` handle to run the main loop. Use the `reactor` handle
-/// to catch Unix signals to terminate the main loop. Use the `timer` handle
-/// to create new time based tasks with either a `Delay` or `Interval`.
+/// The runtime drives the main loop on the current thread. Pipelines are
+/// installed onto the master core through the job queue of the master
+/// core's `CoreExecutor`. The `local` set holds the non-Send pipeline tasks,
+/// which are driven by the runtime's `block_on` during the main loop.
 pub(crate) struct MasterExecutor {
-    pub(crate) reactor: driver::Handle,
-    pub(crate) timer: timer::Handle,
-    pub(crate) thread: CurrentThread<Timer<Reactor>>,
+    pub(crate) runtime: Runtime,
+    pub(crate) local: LocalSet,
 }
 
 /// A thread/core abstraction used to interact with a background thread
 /// from the master/main thread.
 ///
 /// When a background thread is first spawned, it is parked and waiting for
-/// tasks. Use the `timer` handle to create new time based tasks with either
-/// a `Delay` or `Interval`. Use the thread handle to spawn tasks onto the
-/// background thread. Use `unpark` when they are ready to execute tasks.
+/// tasks. Pipelines are installed by sending jobs through the `install`
+/// channel; each job runs on the target core and spawns its pipeline onto
+/// the core's local task set. Use `unpark` when the tasks are ready to
+/// execute.
 ///
 /// The master thread also has an associated `CoreExecutor`, but `unpark`
-/// won't do anything because the thread is not parked. Tasks can be spawned
-/// onto it with this handle just like a background thread.
+/// won't do anything because the thread is not parked. Jobs can be sent to
+/// it through the `install` channel just like a background thread.
 pub(crate) struct CoreExecutor {
-    pub(crate) timer: timer::Handle,
-    pub(crate) thread: current_thread::Handle,
+    pub(crate) install: tokio_mpsc::UnboundedSender<Job>,
     pub(crate) unpark: Option<Unpark>,
     pub(crate) shutdown: Option<ShutdownTrigger>,
     pub(crate) join: Option<JoinHandle<()>>,
+}
+
+/// Drains the job queue and spawns each job's task onto the local set. The
+/// pump task always runs on the thread that owns the `LocalSet`, so the
+/// (possibly non-Send) futures created by the jobs are guaranteed to be
+/// created on the core that runs them.
+async fn pump(mut jobs: tokio_mpsc::UnboundedReceiver<Job>) {
+    while let Some(job) = jobs.recv().await {
+        tokio::task::spawn_local(job());
+    }
 }
 
 /// Core errors.
@@ -254,11 +272,8 @@ impl<'a> CoreMapBuilder<'a> {
                     debug!("spawned background thread {:?}.", thread::current().id());
 
                     match init_background_core(core_id, ptr.0) {
-                        Ok((mut thread, park, shutdown, executor)) => {
+                        Ok((runtime, local, park, shutdown, executor)) => {
                             info!("initialized thread on {:?}.", core_id);
-
-                            // keeps a timer handle for later use.
-                            let timer_handle = executor.timer.clone();
 
                             // sends the executor back to the master core. it's safe to unwrap
                             // the result because the receiving end is guaranteed to be in scope.
@@ -267,16 +282,15 @@ impl<'a> CoreMapBuilder<'a> {
                             info!("parking {:?}.", core_id);
 
                             // sleeps the thread for now since there's nothing to be done yet.
-                            // once new tasks are spawned, the master core can unpark this and
+                            // once new tasks are queued, the master core can unpark this and
                             // let the execution continue.
                             park.park();
 
                             info!("unparked {:?}.", core_id);
 
-                            // once the thread wakes up, we will run all the spawned tasks and
+                            // once the thread wakes up, we will run all the queued jobs and
                             // wait until a shutdown is triggered from the master core.
-                            let _timer = timer::set_default(&timer_handle);
-                            let _ = thread.block_on(shutdown.into_task());
+                            let _ = runtime.block_on(local.run_until(shutdown.into_task()));
 
                             info!("unblocked {:?}.", core_id);
                         }
@@ -309,28 +323,23 @@ fn init_master_core(
     // sets the mempool
     MEMPOOL.with(|tls| tls.set(mempool));
 
-    // starts a reactor so we can receive signals on the master core.
-    let reactor = Reactor::new()?;
-    let reactor_handle = reactor.handle();
+    // starts a single-threaded runtime with the IO and time drivers enabled,
+    // so we can receive signals and schedule timed tasks on the master core.
+    let runtime = Builder::new_current_thread().enable_all().build()?;
 
-    // starts a per-core timer so we can schedule timed tasks.
-    let timer = Timer::new(reactor);
-    let timer_handle = timer.handle();
+    // the local set holds the non-Send pipeline tasks; it is driven by the
+    // main thread inside the runtime's `block_on`.
+    let local = LocalSet::new();
 
-    // starts the single-threaded executor, we can use this handle
-    // to spawn tasks onto this core from the master core.
-    let thread = CurrentThread::new_with_park(timer);
-    let thread_handle = thread.handle();
+    // starts the job queue, we can use this handle to install pipelines
+    // onto this core from the master core.
+    let (install, jobs) = tokio_mpsc::unbounded_channel::<Job>();
+    local.spawn_local(pump(jobs));
 
-    let main = MasterExecutor {
-        reactor: reactor_handle,
-        timer: timer_handle.clone(),
-        thread,
-    };
+    let main = MasterExecutor { runtime, local };
 
     let executor = CoreExecutor {
-        timer: timer_handle,
-        thread: thread_handle,
+        install,
         unpark: None,
         shutdown: None,
         join: None,
@@ -342,45 +351,41 @@ fn init_master_core(
 fn init_background_core(
     id: CoreId,
     mempool: *mut ffi::rte_mempool,
-) -> Result<(
-    CurrentThread<Timer<ParkThread>>,
-    Park,
-    Shutdown,
-    CoreExecutor,
-)> {
+) -> Result<(Runtime, LocalSet, Park, Shutdown, CoreExecutor)> {
     // affinitize the running thread to this core.
     id.set_thread_affinity()?;
 
     // sets the mempool
     MEMPOOL.with(|tls| tls.set(mempool));
 
-    // starts a per-core timer so we can schedule timed tasks.
-    let park = ParkThread::new();
-    let timer = Timer::new(park);
-    let timer_handle = timer.handle();
+    // starts a single-threaded runtime with the IO and time drivers enabled,
+    // so we can schedule timed tasks on this core.
+    let runtime = Builder::new_current_thread().enable_all().build()?;
 
-    // starts the single-threaded executor, we can use this handle
-    // to spawn tasks onto this core from the master core.
-    let thread = CurrentThread::new_with_park(timer);
-    let thread_handle = thread.handle();
+    // the local set holds the non-Send pipeline tasks; it is driven by this
+    // thread inside the runtime's `block_on`.
+    let local = LocalSet::new();
 
-    // problem with using the regular thread park is when a task is
-    // spawned, the handle will implicitly unpark the thread. we have
-    // no way to control that behavior. so instead, we use a channel
-    // based unpark mechanism to block the thread from further
-    // execution until we are ready to proceed.
+    // starts the job queue, the master core can use this handle to install
+    // pipelines onto this core.
+    let (install, jobs) = tokio_mpsc::unbounded_channel::<Job>();
+    local.spawn_local(pump(jobs));
+
+    // problem with running the executor eagerly is the tasks would start
+    // executing before the ports are started. so instead, we use a channel
+    // based park mechanism to block the thread from further execution until
+    // we are ready to proceed.
     let park = Park::new(id);
 
     // shutdown handle for the core.
     let (shutdown, trigger) = Shutdown::new(id);
 
     let executor = CoreExecutor {
-        timer: timer_handle,
-        thread: thread_handle,
+        install,
         unpark: Some(park.unpark()),
         shutdown: Some(trigger),
         join: None,
     };
 
-    Ok((thread, park, shutdown, executor))
+    Ok((runtime, local, park, shutdown, executor))
 }

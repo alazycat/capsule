@@ -396,7 +396,7 @@ pub trait Batch {
 ///     // install logic
 /// }
 /// ```
-pub trait Pipeline: futures::Future<Output = ()> {
+pub trait Pipeline: std::future::Future<Output = ()> {
     /// Returns the name of the pipeline.
     fn name(&self) -> &str;
 
