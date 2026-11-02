@@ -175,3 +175,46 @@ fn main() -> Result<()> {
         .add_pipeline_to_core(1, install_4to6)?
         .execute()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Pins down the idempotency rule: the same source (addr, port) tuple
+    /// always maps to the same assigned port.
+    #[test]
+    fn assigned_port_is_idempotent_for_same_tuple() {
+        let addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1);
+
+        let first = assigned_port(addr, 5000);
+        let second = assigned_port(addr, 5000);
+
+        assert_eq!(first, second);
+    }
+
+    #[test]
+    fn assigned_port_is_unique_for_different_tuples() {
+        let addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2);
+
+        let a = assigned_port(addr, 5001);
+        let b = assigned_port(addr, 5002);
+
+        assert_ne!(a, b);
+    }
+
+    /// Probe for the port-counter wrap-around hazard: `NEXT_PORT` is an
+    /// `AtomicU16` starting at 1025, so it eventually wraps and may collide
+    /// with an already-assigned key. When that happens, `CHashMap::
+    /// insert_new` hits its `debug_assert!(!contains_key)` and panics in
+    /// debug builds (release builds silently insert a duplicate entry).
+    /// This test documents that mechanism. Note: `#[should_panic]` assumes
+    /// a debug build; `cargo test --release` will fail this test.
+    #[test]
+    #[should_panic]
+    fn duplicate_insert_new_panics_in_debug_builds() {
+        let map: CHashMap<u16, u16> = CHashMap::new();
+
+        map.insert_new(1025, 1);
+        map.insert_new(1025, 2);
+    }
+}

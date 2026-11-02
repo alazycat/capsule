@@ -733,4 +733,45 @@ mod tests {
         pipeline.run_once();
         assert!(rx2.try_recv().is_ok());
     }
+
+    /// Pins down `FilterMap`'s error semantics: a closure error aborts the
+    /// packet instead of dropping it. See `batch/filter_map.rs` `next`.
+    #[capsule::test]
+    fn filter_map_error_aborts() {
+        let mut batch = new_batch(&[&IPV4_UDP_PACKET])
+            .filter_map::<Ethernet, _>(|_p| Err(Error::msg("processing error")));
+
+        assert!(batch.next().unwrap().is_abort());
+        assert!(batch.next().is_none());
+    }
+
+    /// Probe for `Poll::replenish`: the documented behavior is that packets
+    /// left unconsumed from the previous cycle are lost (`batch/poll.rs`
+    /// `replenish` docs). This test asks the system to confirm it.
+    #[capsule::test]
+    fn poll_replenish_discards_unconsumed_packets() {
+        let (mut tx, rx) = mpsc::channel();
+        let mut batch = Poll::new(rx);
+
+        // first cycle: two packets queued, only one consumed.
+        tx.transmit(vec![
+            Mbuf::from_bytes(&IPV4_TCP_PACKET).unwrap(),
+            Mbuf::from_bytes(&IPV4_UDP_PACKET).unwrap(),
+        ]);
+        batch.replenish();
+        assert!(batch.next().unwrap().is_act());
+
+        // second cycle: only the newly queued packet survives; the UDP
+        // packet left unconsumed from the first cycle is gone.
+        tx.transmit(vec![Mbuf::from_bytes(&ICMPV4_PACKET).unwrap()]);
+        batch.replenish();
+
+        let disp = batch.next().unwrap();
+        assert!(disp.is_act());
+        if let Disposition::Act(packet) = disp {
+            let v4 = packet.parse::<Ethernet>().unwrap().parse::<Ipv4>().unwrap();
+            assert_eq!(ProtocolNumbers::Icmpv4, v4.protocol());
+        }
+        assert!(batch.next().is_none());
+    }
 }
