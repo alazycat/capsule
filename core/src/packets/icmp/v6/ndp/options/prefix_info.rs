@@ -52,39 +52,39 @@ const AUTO: u8 = 0b0100_0000;
 /// - *Length*:         4
 ///
 /// - *Prefix Length*:  8-bit unsigned integer. The number of leading bits
-///                     in the Prefix that are valid. The value ranges
-///                     from 0 to 128.
+///  in the Prefix that are valid. The value ranges
+///  from 0 to 128.
 ///
 /// - *L*:              1-bit on-link flag. When set, indicates that this
-///                     prefix can be used for on-link determination.
+///  prefix can be used for on-link determination.
 ///
 /// - *A*:              1-bit autonomous address-configuration flag. When
-///                     set indicates that this prefix can be used for
-///                     stateless address configuration.
+///  set indicates that this prefix can be used for
+///  stateless address configuration.
 ///
 /// - *Reserved1*:      6-bit unused field. It MUST be initialized to zero
-///                     by the sender and MUST be ignored by the receiver.
+///  by the sender and MUST be ignored by the receiver.
 ///
 /// - *Valid Lifetime*:
-///                     32-bit unsigned integer. The length of time in
-///                     seconds (relative to the time the packet is sent)
-///                     that the prefix is valid for the purpose of on-link
-///                     determination.
+///  32-bit unsigned integer. The length of time in
+///  seconds (relative to the time the packet is sent)
+///  that the prefix is valid for the purpose of on-link
+///  determination.
 ///
 /// - *Preferred Lifetime*:
-///                     32-bit unsigned integer. The length of time in
-///                     seconds (relative to the time the packet is sent)
-///                     that addresses generated from the prefix via
-///                     stateless address autoconfiguration remain
-///                     preferred.
+///  32-bit unsigned integer. The length of time in
+///  seconds (relative to the time the packet is sent)
+///  that addresses generated from the prefix via
+///  stateless address autoconfiguration remain
+///  preferred.
 ///
 /// - *Reserved2*:      This field is unused. It MUST be initialized to
-///                     zero by the sender and MUST be ignored by the
-///                     receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *Prefix*:         An IP address or a prefix of an IP address. The
-///                     Prefix Length field contains the number of valid
-///                     leading bits in the prefix.
+///  Prefix Length field contains the number of valid
+///  leading bits in the prefix.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.6.2
 pub struct PrefixInformation<'a> {

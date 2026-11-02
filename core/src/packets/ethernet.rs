@@ -52,10 +52,10 @@ const VLAN_802_1AD: u16 = 0x88a8;
 /// - *Destination MAC*: 48-bit MAC address of the originator of the packet.
 ///
 /// - *Source MAC*:      48-bit MAC address of the intended recipient of
-///                      the packet.
+///  the packet.
 ///
 /// - *Ether Type*:      16-bit indicator. Identifies which protocol is
-///                      encapsulated in the payload of the frame.
+///  encapsulated in the payload of the frame.
 ///
 /// # 802.1Q aka Dot1q
 ///
@@ -83,21 +83,21 @@ const VLAN_802_1AD: u16 = 0x88a8;
 /// ```
 ///
 /// - *TPID*:            16-bit tag protocol identifier, located at the same
-///                      position as the EtherType field in untagged frames.
+///  position as the EtherType field in untagged frames.
 ///
 /// - *TCI*:             16-bit tag control information containing the following
-///                      sub-fields.
+///  sub-fields.
 ///
 /// - *PCP*:             3-bit priority code point which refers to the IEEE
-///                      802.1p class of service and maps to the frame priority
-///                      level.
+///  802.1p class of service and maps to the frame priority
+///  level.
 ///
 /// - *DEI*:             1-bit drop eligible indicator, may be used separately
-///                      or in conjunction with PCP to indicate frames eligible
-///                      to be dropped in the presence of congestion.
+///  or in conjunction with PCP to indicate frames eligible
+///  to be dropped in the presence of congestion.
 ///
 /// - *VID*:             12-bit VLAN identifier specifying the VLAN to which the
-///                      frame belongs.
+///  frame belongs.
 ///
 /// # 802.1ad aka QinQ
 ///

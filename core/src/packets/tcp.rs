@@ -62,25 +62,25 @@ const FIN: u8 = 0b0000_0001;
 /// ```
 ///
 /// - *Source Port*: (16 bits)
-///      The source port number.
+///  The source port number.
 ///
 /// - *Destination Port*: (16 bits)
-///      The destination port number.
+///  The destination port number.
 ///
 /// - *Sequence Number*: (32 bits)
-///      The sequence number of the first data octet in this segment (except
-///      when SYN is present). If SYN is present the sequence number is the
-///      initial sequence number (ISN) and the first data octet is ISN+1.
+///  The sequence number of the first data octet in this segment (except
+///  when SYN is present). If SYN is present the sequence number is the
+///  initial sequence number (ISN) and the first data octet is ISN+1.
 ///
 /// - *Acknowledgment Number*: (32 bits)
-///      If the ACK control bit is set this field contains the value of the
-///      next sequence number the sender of the segment is expecting to
-///      receive.  Once a connection is established this is always sent.
+///  If the ACK control bit is set this field contains the value of the
+///  next sequence number the sender of the segment is expecting to
+///  receive.  Once a connection is established this is always sent.
 ///
 /// - *Data Offset*: (4 bits)
-///      The number of 32 bit words in the TCP Header.  This indicates where
-///      the data begins.  The TCP header (even one including options) is an
-///      integral number of 32 bits long.
+///  The number of 32 bit words in the TCP Header.  This indicates where
+///  the data begins.  The TCP header (even one including options) is an
+///  integral number of 32 bits long.
 ///
 /// - *Control Bits*: (9 bits) [from left to right]
 ///      - NS:   ECN-nonce nonce sum [IETF RFC 3540]
@@ -94,25 +94,25 @@ const FIN: u8 = 0b0000_0001;
 ///      - FIN:  No more data from sender
 ///
 /// - *Window*: (16 bits)
-///      The number of data octets beginning with the one indicated in the
-///      acknowledgment field which the sender of this segment is willing to
-///      accept.
+///  The number of data octets beginning with the one indicated in the
+///  acknowledgment field which the sender of this segment is willing to
+///  accept.
 ///
 /// - *Checksum*: (16 bits)
-///      The checksum field is the 16 bit one's complement of the one's
-///      complement sum of all 16 bit words in the header and text.
+///  The checksum field is the 16 bit one's complement of the one's
+///  complement sum of all 16 bit words in the header and text.
 ///
 /// - *Urgent Pointer*: (16 bits)
-///      This field communicates the current value of the urgent pointer as a
-///      positive offset from the sequence number in this segment.  The
-///      urgent pointer points to the sequence number of the octet following
-///      the urgent data.  This field is only be interpreted in segments with
-///      the URG control bit set.
+///  This field communicates the current value of the urgent pointer as a
+///  positive offset from the sequence number in this segment.  The
+///  urgent pointer points to the sequence number of the octet following
+///  the urgent data.  This field is only be interpreted in segments with
+///  the URG control bit set.
 ///
 /// - *Options*: (variable)
-///     Options may occupy space at the end of the TCP header and are a
-///     multiple of 8 bits in length.  All options are included in the
-///     checksum.
+///  Options may occupy space at the end of the TCP header and are a
+///  multiple of 8 bits in length.  All options are included in the
+///  checksum.
 ///
 /// [IETF RFC 793]: https://tools.ietf.org/html/rfc793#section-3.1
 /// [IETF RFC 3540]: https://tools.ietf.org/html/rfc3540

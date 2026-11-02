@@ -64,14 +64,14 @@ impl PortStats {
             ffi::rte_eth_stats_get(self.id.raw(), &mut stats).into_result(DpdkError::from_errno)?;
         }
 
-        let mut values = Vec::new();
-
-        values.push(self.new_counter("octets", stats.ibytes, "rx"));
-        values.push(self.new_counter("octets", stats.obytes, "tx"));
-        values.push(self.new_counter("dropped", stats.imissed, "rx"));
-        values.push(self.new_counter("errors", stats.ierrors, "rx"));
-        values.push(self.new_counter("errors", stats.oerrors, "tx"));
-        values.push(self.new_counter("no_mbuf", stats.rx_nombuf, "rx"));
+        let values = vec![
+            self.new_counter("octets", stats.ibytes, "rx"),
+            self.new_counter("octets", stats.obytes, "tx"),
+            self.new_counter("dropped", stats.imissed, "rx"),
+            self.new_counter("errors", stats.ierrors, "rx"),
+            self.new_counter("errors", stats.oerrors, "tx"),
+            self.new_counter("no_mbuf", stats.rx_nombuf, "rx"),
+        ];
 
         Ok(values)
     }

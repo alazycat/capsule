@@ -44,16 +44,16 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Reserved*:       This field is unused. It MUST be initialized to
-///                     zero by the sender and MUST be ignored by the
-///                     receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *Target Address*: The IP address of the target of the solicitation.
-///                     It MUST NOT be a multicast address.
+///  It MUST NOT be a multicast address.
 ///
 /// Possible options:
 ///
 /// - *Source link-layer address*:
-///                     The link-layer address for the sender.
+///  The link-layer address for the sender.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.3
 #[derive(Icmpv6Packet)]

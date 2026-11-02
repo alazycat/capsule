@@ -373,7 +373,7 @@ impl<'a> KniBuilder<'a> {
 
     pub(crate) fn mac_addr(&mut self, mac: MacAddr) -> &mut Self {
         unsafe {
-            self.conf.mac_addr = mem::transmute(mac);
+            self.conf.mac_addr = mem::transmute::<MacAddr, [u8; 6]>(mac);
         }
         self
     }

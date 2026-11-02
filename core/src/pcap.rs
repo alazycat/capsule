@@ -138,7 +138,7 @@ impl Pcap {
     }
 }
 
-impl<'a> fmt::Debug for Pcap {
+impl fmt::Debug for Pcap {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("pcap").field("path", &self.path).finish()
     }

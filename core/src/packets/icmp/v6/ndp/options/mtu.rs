@@ -41,11 +41,11 @@ use std::ptr::NonNull;
 /// - *Length*:          1
 ///
 /// - *Reserved*:        This field is unused. It MUST be initialized to
-///                      zero by the sender and MUST be ignored by the
-///                      receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *MTU*:             32-bit unsigned integer. The recommended MTU for
-///                      the link.
+///  the link.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.6.4
 pub struct Mtu<'a> {

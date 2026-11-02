@@ -55,16 +55,16 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Type*:          Indicates the type of the message. Its value determines
-///                    the format of the remaining data.
+///  the format of the remaining data.
 ///
 /// - *Code*:          This field depends on the message type. It is used to
-///                    create an additional level of message granularity.
+///  create an additional level of message granularity.
 ///
 /// - *Checksum*:      This field is used to detect data corruption in the
-///                    ICMPv6 message and parts of the IPv6 header.
+///  ICMPv6 message and parts of the IPv6 header.
 ///
 /// - *Message Body*:  Varies based on the type field. Each specific type
-///                    is implemented with trait [`Icmpv6Message`].
+///  is implemented with trait [`Icmpv6Message`].
 ///
 /// # Example
 ///

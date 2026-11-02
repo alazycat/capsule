@@ -48,53 +48,53 @@ const O_FLAG: u8 = 0b0100_0000;
 /// ```
 ///
 /// - *Cur Hop Limit*:  8-bit unsigned integer. The default value that
-///                     should be placed in the Hop Count field of the IP
-///                     header for outgoing IP packets. A value of zero
-///                     means unspecified (by this router).
+///  should be placed in the Hop Count field of the IP
+///  header for outgoing IP packets. A value of zero
+///  means unspecified (by this router).
 ///
 /// - *M*:              1-bit "Managed address configuration" flag. When
-///                     set, it indicates that addresses are available via
-///                     Dynamic Host Configuration Protocol DHCPv6.
+///  set, it indicates that addresses are available via
+///  Dynamic Host Configuration Protocol DHCPv6.
 ///
 /// - *O*:              1-bit "Other configuration" flag. When set, it
-///                     indicates that other configuration information is
-///                     available via DHCPv6.
+///  indicates that other configuration information is
+///  available via DHCPv6.
 ///
 /// Note: If neither M nor O flags are set, this indicates that no
 /// information is available via DHCPv6.
 ///
 /// - *Reserved*:       A 6-bit unused field. It MUST be initialized to
-///                     zero by the sender and MUST be ignored by the
-///                     receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *Router Lifetime*:
-///                     16-bit unsigned integer. The lifetime associated
-///                     with the default router in units of seconds.
+///  16-bit unsigned integer. The lifetime associated
+///  with the default router in units of seconds.
 ///
 /// - *Reachable Time*: 32-bit unsigned integer. The time, in
-///                     milliseconds, that a node assumes a neighbor is
-///                     reachable after having received a reachability
-///                     confirmation.
+///  milliseconds, that a node assumes a neighbor is
+///  reachable after having received a reachability
+///  confirmation.
 ///
 /// - *Retrans Timer*:  32-bit unsigned integer. The time, in
-///                     milliseconds, between retransmitted Neighbor
-///                     Solicitation messages.
+///  milliseconds, between retransmitted Neighbor
+///  Solicitation messages.
 ///
 /// Possible options:
 ///
 /// - *Source link-layer address*:
-///                     The link-layer address of the interface from which
-///                     the Router Advertisement is sent.
+///  The link-layer address of the interface from which
+///  the Router Advertisement is sent.
 ///
 /// - *MTU*:            SHOULD be sent on links that have a variable MTU
-///                     (as specified in the document that describes how to
-///                     run IP over the particular link type). MAY be sent
-///                     on other links.
+///  (as specified in the document that describes how to
+///  run IP over the particular link type). MAY be sent
+///  on other links.
 ///
 /// - *Prefix Information*:
-///                     These options specify the prefixes that are on-link
-///                     and/or are used for stateless address
-///                     autoconfiguration.
+///  These options specify the prefixes that are on-link
+///  and/or are used for stateless address
+///  autoconfiguration.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.2
 #[derive(Icmpv6Packet)]

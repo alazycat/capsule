@@ -46,26 +46,26 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Reserved*:       This field is unused. It MUST be initialized to
-///                     zero by the sender and MUST be ignored by the
-///                     receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *Target Address*: An IP address that is a better first hop to use for
-///                     the ICMP Destination Address.
+///  the ICMP Destination Address.
 ///
 /// - *Destination Address*:
-///                     The IP address of the destination which is
-///                     redirected to the target.
+///  The IP address of the destination which is
+///  redirected to the target.
 ///
 /// Possible options:
 ///
 /// - *Target link-layer address*:
-///                     The link-layer address for the target. It SHOULD
-///                     be included (if known).
+///  The link-layer address for the target. It SHOULD
+///  be included (if known).
 ///
 /// - *Redirected Header*:
-///                     As much as possible of the IP packet that triggered
-///                     the sending of the Redirect without making the
-///                     redirect packet exceed 1280 octets.
+///  As much as possible of the IP packet that triggered
+///  the sending of the Redirect without making the
+///  redirect packet exceed 1280 octets.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc2461#section-4.5
 #[derive(Icmpv6Packet)]

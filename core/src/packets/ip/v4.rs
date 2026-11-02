@@ -64,31 +64,31 @@ const FLAGS_MF: u16be = u16be(u16::to_be(0b0010_0000_0000_0000));
 /// ```
 ///
 /// - *Version*: (4 bits)
-///      The Version field indicates the format of the internet header. This
-///      document describes version 4.
+///  The Version field indicates the format of the internet header. This
+///  document describes version 4.
 ///
 /// - *IHL*: (4 bits)
-///      Internet Header Length is the length of the internet header in 32
-///      bit words, and thus points to the beginning of the data. Note that
-///      the minimum value for a correct header is 5.
+///  Internet Header Length is the length of the internet header in 32
+///  bit words, and thus points to the beginning of the data. Note that
+///  the minimum value for a correct header is 5.
 ///
 /// - *DSCP*: (6 bits)
-///      Differentiated services codepoint defined in [IETF RFC 2474]. Used to
-///      select the per hop behavior a packet experiences at each node.
+///  Differentiated services codepoint defined in [IETF RFC 2474]. Used to
+///  select the per hop behavior a packet experiences at each node.
 ///
 /// - *ECN*: (2 bits)
-///      Explicit congestion notification codepoint defined in [IETF RFC 3168].
+///  Explicit congestion notification codepoint defined in [IETF RFC 3168].
 ///
 /// - *Total Length*: (16 bits)
-///      Total Length is the length of the datagram, measured in octets,
-///      including internet header and data.
+///  Total Length is the length of the datagram, measured in octets,
+///  including internet header and data.
 ///
 /// - *Identification*: (16 bits)
-///      An identifying value assigned by the sender to aid in assembling the
-///      fragments of a datagram.
+///  An identifying value assigned by the sender to aid in assembling the
+///  fragments of a datagram.
 ///
 /// - *Flags*: (3 bits)
-///      Various Control Flags.
+///  Various Control Flags.
 ///
 ///      - Bit 0: reserved, must be zero
 ///      - Bit 1: (DF) 0 = May Fragment,  1 = Don't Fragment.
@@ -101,43 +101,43 @@ const FLAGS_MF: u16be = u16be(u16::to_be(0b0010_0000_0000_0000));
 ///            +---+---+---+
 ///
 /// - *Fragment Offset*: (13 bits)
-///      This field indicates where in the datagram this fragment belongs.
-///      The fragment offset is measured in units of 8 octets (64 bits). The
-///      first fragment has offset zero.
+///  This field indicates where in the datagram this fragment belongs.
+///  The fragment offset is measured in units of 8 octets (64 bits). The
+///  first fragment has offset zero.
 ///
 /// - *Time to Live*: (8 bits)
-///      This field indicates the maximum time the datagram is allowed to
-///      remain in the internet system. If this field contains the value
-///      zero, then the datagram must be destroyed. This field is modified
-///      in internet header processing. The time is measured in units of
-///      seconds, but since every module that processes a datagram must
-///      decrease the TTL by at least one even if it process the datagram in
-///      less than a second, the TTL must be thought of only as an upper
-///      bound on the time a datagram may exist. The intention is to cause
-///      undeliverable datagrams to be discarded, and to bound the maximum
-///      datagram lifetime.
+///  This field indicates the maximum time the datagram is allowed to
+///  remain in the internet system. If this field contains the value
+///  zero, then the datagram must be destroyed. This field is modified
+///  in internet header processing. The time is measured in units of
+///  seconds, but since every module that processes a datagram must
+///  decrease the TTL by at least one even if it process the datagram in
+///  less than a second, the TTL must be thought of only as an upper
+///  bound on the time a datagram may exist. The intention is to cause
+///  undeliverable datagrams to be discarded, and to bound the maximum
+///  datagram lifetime.
 ///
 /// - *Protocol*: (8 bits)
-///      This field indicates the next level protocol used in the data
-///      portion of the internet datagram. The values for various protocols
-///      are specified in "Assigned Numbers."
+///  This field indicates the next level protocol used in the data
+///  portion of the internet datagram. The values for various protocols
+///  are specified in "Assigned Numbers."
 ///
 /// - *Header Checksum*: (16 bits)
-///      A checksum on the header only. Since some header fields change
-///      (e.g., time to live), this is recomputed and verified at each point
-///      that the internet header is processed.
+///  A checksum on the header only. Since some header fields change
+///  (e.g., time to live), this is recomputed and verified at each point
+///  that the internet header is processed.
 ///
 /// - *Source Address*: (32 bits)
-///      The source address.
+///  The source address.
 ///
 /// - *Destination Address*: (32 bits)
-///      The destination address.
+///  The destination address.
 ///
 /// - *Options*:  (variable)
-///      The options may appear or not in datagrams. They must be
-///      implemented by all IP modules (host and gateways). What is optional
-///      is their transmission in any particular datagram, not their
-///      implementation.
+///  The options may appear or not in datagrams. They must be
+///  implemented by all IP modules (host and gateways). What is optional
+///  is their transmission in any particular datagram, not their
+///  implementation.
 ///
 /// [IETF RFC 791]: https://tools.ietf.org/html/rfc791#section-3.1
 /// [IETF RFC 2474]: https://tools.ietf.org/html/rfc2474

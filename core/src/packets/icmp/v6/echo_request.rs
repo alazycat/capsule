@@ -40,10 +40,10 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Identifier*:       An identifier to aid in matching Echo Replies
-///                       to this Echo Request.  May be zero.
+///  to this Echo Request.  May be zero.
 ///
 /// - *Sequence Number*:  A sequence number to aid in matching Echo Replies
-///                       to this Echo Request.  May be zero.
+///  to this Echo Request.  May be zero.
 ///
 /// - *Data*:             Zero or more octets of arbitrary data.
 ///

@@ -601,7 +601,7 @@ impl Runtime {
     }
 }
 
-impl<'a> fmt::Debug for Runtime {
+impl fmt::Debug for Runtime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("runtime")
             .field("runtime configuration", &format!("{:?}", self.config))

@@ -49,33 +49,33 @@ const O_FLAG: u8 = 0b0010_0000;
 /// ```
 ///
 /// - *R*:              Router flag. When set, the R-bit indicates that
-///                     the sender is a router.
+///  the sender is a router.
 ///
 /// - *S*:              Solicited flag. When set, the S-bit indicates that
-///                     the advertisement was sent in response to a
-///                     Neighbor Solicitation from the Destination address.
+///  the advertisement was sent in response to a
+///  Neighbor Solicitation from the Destination address.
 ///
 /// - *O*:              Override flag. When set, the O-bit indicates that
-///                     the advertisement should override an existing cache
-///                     entry and update the cached link-layer address.
+///  the advertisement should override an existing cache
+///  entry and update the cached link-layer address.
 ///
 /// - *Reserved*:       29-bit unused field. It MUST be initialized to
-///                     zero by the sender and MUST be ignored by the
-///                     receiver.
+///  zero by the sender and MUST be ignored by the
+///  receiver.
 ///
 /// - *Target Address*:
-///                     For solicited advertisements, the Target Address
-///                     field in the Neighbor Solicitation message that
-///                     prompted this advertisement. For an unsolicited
-///                     advertisement, the address whose link-layer address
-///                     has changed. The Target Address MUST NOT be a
-///                     multicast address.
+///  For solicited advertisements, the Target Address
+///  field in the Neighbor Solicitation message that
+///  prompted this advertisement. For an unsolicited
+///  advertisement, the address whose link-layer address
+///  has changed. The Target Address MUST NOT be a
+///  multicast address.
 ///
 /// Possible options:
 ///
 /// - *Target link-layer address*:
-///                     The link-layer address for the target, i.e., the
-///                     sender of the advertisement.
+///  The link-layer address for the target, i.e., the
+///  sender of the advertisement.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.4
 #[derive(Icmpv6Packet)]

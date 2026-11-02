@@ -35,14 +35,14 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Type*:           1 for Source Link-layer Address.
-///                     2 for Target Link-layer Address.
+///  2 for Target Link-layer Address.
 ///
 /// - *Length*:         The length of the option (including the type and
-///                     length fields) in units of 8 octets. For example,
-///                     the length for IEEE 802 addresses is 1.
+///  length fields) in units of 8 octets. For example,
+///  the length for IEEE 802 addresses is 1.
 ///
 /// - *Link-Layer Address*:
-///                     The variable length link-layer address.
+///  The variable length link-layer address.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.6.1
 pub struct LinkLayerAddress<'a> {

@@ -44,20 +44,20 @@ const FLAG_MORE: u16be = u16be(u16::to_be(0b1));
 /// ```
 ///
 /// - *Next Header*:      8-bit selector.  Identifies the initial header
-///                       type of the Fragmentable Part of the original
-///                       packet. Uses the same values as the IPv4 Protocol
-///                       field [IANA-PN].
+///  type of the Fragmentable Part of the original
+///  packet. Uses the same values as the IPv4 Protocol
+///  field [IANA-PN].
 ///
 /// - *Reserved*:         8-bit reserved field.  Initialized to zero for
-///                       transmission; ignored on reception.
+///  transmission; ignored on reception.
 ///
 /// - *Fragment Offset*:  13-bit unsigned integer.  The offset, in
-///                       8-octet units, of the data following this
-///                       header, relative to the start of the
-///                       Fragmentable Part of the original packet.
+///  8-octet units, of the data following this
+///  header, relative to the start of the
+///  Fragmentable Part of the original packet.
 ///
 /// - *Res*:              2-bit reserved field.  Initialized to zero for
-///                       transmission; ignored on reception.
+///  transmission; ignored on reception.
 ///
 /// - *M flag*:           1 = more fragments; 0 = last fragment.
 ///
