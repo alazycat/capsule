@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright 2019 Comcast Cable Communications Management, LLC
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,7 +120,7 @@ pub struct CoreId(usize);
 
 impl CoreId {
     /// Any lcore to indicate that no thread affinity is set.
-    pub const ANY: Self = CoreId(std::usize::MAX);
+    pub const ANY: Self = CoreId(usize::MAX);
 
     /// Creates a new CoreId from the numeric ID assigned to the core
     /// by the system.

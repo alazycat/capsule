@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright 2019 Comcast Cable Communications Management, LLC
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -131,8 +131,8 @@ impl Cidr for Ipv4Cidr {
     #[inline]
     fn new(address: Self::Addr, length: usize) -> Result<Self, CidrError> {
         let mask = match length {
-            0 => u32::max_value(),
-            1..=IPV4ADDR_BITS => u32::max_value() << (IPV4ADDR_BITS - length),
+            0 => u32::MAX,
+            1..=IPV4ADDR_BITS => u32::MAX << (IPV4ADDR_BITS - length),
             _ => return Err(CidrError::Malformed("Not a valid length".to_owned())),
         };
 

@@ -275,9 +275,17 @@ jobs:
       - name: cargo-clippy-fix
         shell: bash
         run: |
+          # actions/checkout may fall back to a REST download without a
+          # .git directory; establish a baseline commit so `git diff` can
+          # export the fixes either way.
+          if ! git rev-parse --git-dir >/dev/null 2>&1; then
+            git init -q .
+            git add -A
+            git -c user.name=ci -c user.email=ci@example.com commit -qm baseline
+          fi
           pushd core && cargo clippy --fix --allow-dirty --all-targets --features full; popd
           cargo clippy --fix --allow-dirty --all-targets --workspace --exclude capsule || true
-          git diff > clippy-fix.patch
+          git diff -- core ffi macros bench examples > clippy-fix.patch
           git diff --stat
 
       - name: upload-clippy-fix-patch
