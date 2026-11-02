@@ -17,6 +17,7 @@
 */
 
 use crate::dpdk::{CoreId, Mempool, MempoolMap, MEMPOOL};
+use crate::ffi;
 use crate::{debug, error, info};
 use anyhow::Result;
 use std::collections::{HashMap, HashSet};
@@ -38,6 +39,20 @@ pub(crate) type LocalTask = Pin<Box<dyn Future<Output = ()>>>;
 /// core. The job itself must be `Send` so it can be queued from the master
 /// thread, but the task it creates runs locally on the target core.
 pub(crate) type Job = Box<dyn FnOnce() -> LocalTask + Send>;
+
+/// A wrapper around the job channel sender. The send error is mapped into
+/// an anyhow error here because `Job` is not `Sync`, so the implicit
+/// `From<SendError<Job>>` conversion used by `?` does not apply.
+#[derive(Debug, Clone)]
+pub(crate) struct JobSender(tokio_mpsc::UnboundedSender<Job>);
+
+impl JobSender {
+    pub(crate) fn send(&self, job: Job) -> Result<()> {
+        self.0
+            .send(job)
+            .map_err(|_| anyhow::Error::msg("core executor job channel is closed"))
+    }
+}
 
 /// A sync-channel based park handle.
 ///
@@ -150,7 +165,7 @@ pub(crate) struct MasterExecutor {
 /// won't do anything because the thread is not parked. Jobs can be sent to
 /// it through the `install` channel just like a background thread.
 pub(crate) struct CoreExecutor {
-    pub(crate) install: tokio_mpsc::UnboundedSender<Job>,
+    pub(crate) install: JobSender,
     pub(crate) unpark: Option<Unpark>,
     pub(crate) shutdown: Option<ShutdownTrigger>,
     pub(crate) join: Option<JoinHandle<()>>,
@@ -339,7 +354,7 @@ fn init_master_core(
     let main = MasterExecutor { runtime, local };
 
     let executor = CoreExecutor {
-        install,
+        install: JobSender(install),
         unpark: None,
         shutdown: None,
         join: None,
@@ -381,7 +396,7 @@ fn init_background_core(
     let (shutdown, trigger) = Shutdown::new(id);
 
     let executor = CoreExecutor {
-        install,
+        install: JobSender(install),
         unpark: Some(park.unpark()),
         shutdown: Some(trigger),
         join: None,
