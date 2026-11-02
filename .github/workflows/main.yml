@@ -11,7 +11,7 @@ on:
 
 jobs:
   audit:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
@@ -28,7 +28,7 @@ jobs:
   # issue on critcmp: https://github.com/BurntSushi/critcmp/issues/5
   bench-pr:
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     container:
       image: getcapsule/sandbox
@@ -104,7 +104,7 @@ jobs:
 
   bench:
     if: github.event_name == 'push'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     container:
       image: getcapsule/sandbox
@@ -123,7 +123,7 @@ jobs:
           path: ./target/criterion
 
   check:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         rust-toolchain: [stable, beta, nightly]
@@ -153,7 +153,7 @@ jobs:
         continue-on-error: ${{ matrix.can-fail }}
 
   coverage:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     container:
       image: getcapsule/sandbox
@@ -187,7 +187,7 @@ jobs:
           file: ./cobertura.xml
 
   format:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
@@ -203,7 +203,7 @@ jobs:
           args: --all -- --check
 
   lint:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     container:
       image: getcapsule/sandbox
@@ -216,7 +216,7 @@ jobs:
         run: make lint
 
   sanitize:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v2
@@ -241,7 +241,7 @@ jobs:
             && cargo run --target x86_64-unknown-linux-gnu -Zbuild-std -- -f pktdump.toml"
 
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     container:
       image: getcapsule/sandbox
@@ -256,7 +256,7 @@ jobs:
   discord-pr:
     if: github.event_name == 'pull_request'
     needs: [audit, bench-pr, check, coverage, format, lint, sanitize, test]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: discord-it
         uses: rjstone/discord-webhook-notify@v1
@@ -269,7 +269,7 @@ jobs:
   discord:
     if: github.event_name == 'push'
     needs: [audit, bench, check, coverage, format, lint, sanitize, test]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       - name: discord-it
         uses: rjstone/discord-webhook-notify@v1
