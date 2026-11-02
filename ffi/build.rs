@@ -188,6 +188,10 @@ fn bind(path: &Path) {
         .derive_debug(true)
         .derive_default(true)
         .derive_partialeq(true)
+        // the generated layout tests take references to fields of packed
+        // structs, which newer rustc rejects (E0793); they are not used at
+        // runtime, so skip generating them.
+        .layout_tests(false)
         .default_enum_style(bindgen::EnumVariation::ModuleConsts)
         .clang_arg("-finline-functions")
         .clang_arg("-march=corei7-avx")
