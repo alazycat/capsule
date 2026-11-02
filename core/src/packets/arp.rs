@@ -48,39 +48,39 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Hardware Type*: (16 bits)
-///  The network link protocol type.
+///   The network link protocol type.
 ///
 /// - *Protocol Type*: (16 bits)
-///  The internetwork protocol for which the ARP request is intended.
+///   The internetwork protocol for which the ARP request is intended.
 ///
 /// - *H Length*: (8 bits)
-///  Length (in octets) of a hardware address.
+///   Length (in octets) of a hardware address.
 ///
 /// - *P Length*: (8 bits)
-///  Length (in octets) of a protocol address.
+///   Length (in octets) of a protocol address.
 ///
 /// - *Operation Code*: (16 bits)
-///  The operation that the sender is performing.
+///   The operation that the sender is performing.
 ///
 /// - *Sender Hardware Address*: (variable)
-///  Hardware address of the sender. In an ARP request this field is used
-///  to indicate the address of the host sending the request. In an ARP
-///  reply this field is used to indicate the address of the host that the
-///  request was looking for. The address size is defined by *H Length*.
+///   Hardware address of the sender. In an ARP request this field is used
+///   to indicate the address of the host sending the request. In an ARP
+///   reply this field is used to indicate the address of the host that the
+///   request was looking for. The address size is defined by *H Length*.
 ///
 /// - *Sender Protocol Address*: (variable)
-///  Protocol address of the sender. The address size is defined by
-///  *P Length*.
+///   Protocol address of the sender. The address size is defined by
+///   *P Length*.
 ///
 /// - *Target Hardware Address*: (variable)
-///  Hardware address of the intended receiver. In an ARP request this
-///  field is ignored. In an ARP reply this field is used to indicate the
-///  address of the host that originated the ARP request. The address
-///  size is defined by *H Length*.
+///   Hardware address of the intended receiver. In an ARP request this
+///   field is ignored. In an ARP reply this field is used to indicate the
+///   address of the host that originated the ARP request. The address
+///   size is defined by *H Length*.
 ///
 /// - *Target Protocol Address*: (variable)
-///  Protocol address of the intended receiver. The address size is
-///  defined by *P Length*.
+///   Protocol address of the intended receiver. The address size is
+///   defined by *P Length*.
 ///
 /// [IETF RFC 826]: https://tools.ietf.org/html/rfc826
 pub struct Arp<H: HardwareAddr, P: ProtocolAddr> {

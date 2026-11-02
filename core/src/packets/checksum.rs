@@ -130,15 +130,15 @@ fn v6_csum(src: Ipv6Addr, dst: Ipv6Addr, packet_len: u16, protocol: ProtocolNumb
 /// Computes the Internet checksum as defined in [IETF RFC 1071].
 ///
 /// 1. Adjacent octets to be checksummed are paired to form 16-bit integers,
-/// and the 1's complement sum of these 16-bit integers is formed.
+///    and the 1's complement sum of these 16-bit integers is formed.
 ///
 /// 2. To generate a checksum, the checksum field itself is cleared, the
-/// 16-bit 1's complement sum is computed over the octets concerned, and the
-/// 1's complement of this sum is placed in the checksum field.
+///    16-bit 1's complement sum is computed over the octets concerned, and the
+///    1's complement of this sum is placed in the checksum field.
 ///
 /// 3. To check a checksum, the 1's complement sum is computed over the same
-/// set of octets, including the checksum field.  If the result is all 1 bits
-/// (-0 in 1's complement arithmetic), the check succeeds.
+///    set of octets, including the checksum field.  If the result is all 1 bits
+///    (-0 in 1's complement arithmetic), the check succeeds.
 ///
 /// [IETF RFC 1071]: https://tools.ietf.org/html/rfc1071
 #[allow(clippy::cast_ptr_alignment)]

@@ -42,7 +42,7 @@ use std::ptr::NonNull;
 /// - *Identifier*:       The identifier from the invoking Echo Request message.
 ///
 /// - *Sequence Number*:  The sequence number from the invoking Echo Request
-///  message.
+///   message.
 ///
 /// - *Data*:             The data from the invoking Echo Request message.
 ///

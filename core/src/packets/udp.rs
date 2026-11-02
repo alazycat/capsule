@@ -42,30 +42,30 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Source Port*: (16 bits)
-///  An  optional field that, when meaningful, indicates the port
-///  of the sending process, and may be assumed to be the port to which a
-///  reply should be addressed in the absence of any other information. If
-///  not used, a value of zero is inserted.
+///   An  optional field that, when meaningful, indicates the port
+///   of the sending process, and may be assumed to be the port to which a
+///   reply should be addressed in the absence of any other information. If
+///   not used, a value of zero is inserted.
 ///
 /// - *Destination Port*: (16 bits)
-///  Has a meaning  within the context of a particular Internet
-///  destination address.
+///   Has a meaning  within the context of a particular Internet
+///   destination address.
 ///
 /// - *Length*: (16 bits)
-///  The length  in octets of this user datagram including its
-///  header and the data. (This means the minimum value of the length is
-///  eight.)
+///   The length  in octets of this user datagram including its
+///   header and the data. (This means the minimum value of the length is
+///   eight.)
 ///
 /// - *Checksum*: (16 bits)
-///  The 16-bit one's complement of the one's complement sum of a
-///  pseudo header of information from the IP header, the UDP header, and
-///  the data, padded with zero octets at the end (if necessary) to make a
-///  multiple of two octets.
+///   The 16-bit one's complement of the one's complement sum of a
+///   pseudo header of information from the IP header, the UDP header, and
+///   the data, padded with zero octets at the end (if necessary) to make a
+///   multiple of two octets.
 ///
 ///      The pseudo header conceptually prefixed to the UDP header contains the
-///  source address, the destination address, the protocol, and the UDP
-///  length. This information gives protection against misrouted datagrams.
-///  This checksum procedure is the same as is used in TCP.
+///   source address, the destination address, the protocol, and the UDP
+///   length. This information gives protection against misrouted datagrams.
+///   This checksum procedure is the same as is used in TCP.
 ///
 /// [IETF RFC 768]: https://tools.ietf.org/html/rfc768
 pub struct Udp<E: IpPacket> {
@@ -341,7 +341,7 @@ impl<E: IpPacket> Packet for Udp<E> {
     ///
     /// * [`length`] is set to the total length of the header and the payload.
     /// * [`checksum`] is computed based on the [`pseudo-header`] and the
-    /// full packet.
+    ///   full packet.
     ///
     /// [`length`]: Udp::length
     /// [`checksum`]: Udp::checksum

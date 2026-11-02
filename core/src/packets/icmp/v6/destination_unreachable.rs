@@ -142,9 +142,9 @@ impl<E: Ipv6Packet> Icmpv6Message for DestinationUnreachable<E> {
     /// the packet.
     ///
     /// * the whole packet is truncated so it doesn't exceed the [minimum
-    /// IPv6 MTU].
+    ///   IPv6 MTU].
     /// * [`checksum`] is computed based on the pseudo-header and the
-    /// `DestinationUnreachable` message.
+    ///   `DestinationUnreachable` message.
     ///
     /// [minimum IPv6 MTU]: IPV6_MIN_MTU
     /// [`checksum`]: Icmpv6::checksum

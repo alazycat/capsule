@@ -54,21 +54,21 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Next Header*:       8-bit selector. Identifies the type of header
-///  immediately following the SRH.
+///   immediately following the SRH.
 ///
 /// - *Hdr Ext Len*:       8-bit unsigned integer, is the length of the SRH
-///  header in 8-octet units, not including the first 8
-///  octets.
+///   header in 8-octet units, not including the first 8
+///   octets.
 ///
 /// - *Routing Type*:      TBD, to be assigned by IANA (suggested value: 4).
 ///
 /// - *Segments Left*:     8-bit unsigned integer Number of route segments
-///  remaining, i.e., number of explicitly listed
-///  intermediate nodes still to be visited before
-///  reaching the final destination.
+///   remaining, i.e., number of explicitly listed
+///   intermediate nodes still to be visited before
+///   reaching the final destination.
 ///
 /// - *Last Entry*:        Contains the index (zero based), in the Segment List,
-///  of the last element of the Segment List.
+///   of the last element of the Segment List.
 ///
 /// - *Flags*:             8 bits of flags. Following flags are defined:
 ///
@@ -78,21 +78,21 @@ use std::ptr::NonNull;
 ///       +-+-+-+-+-+-+-+-+
 ///
 ///   - *U*:               Unused and for future use. MUST be 0 on transmission
-///    and ignored on receipt.
+///     and ignored on receipt.
 ///
 /// - *Tag*:               Tag a packet as part of a class or group of packets,
-///  e.g., packets sharing the same set of properties.
+///   e.g., packets sharing the same set of properties.
 ///
 /// - *Segment List\[n]*:  128 bit IPv6 addresses representing the nth
-///  segment in the Segment List.  The Segment List is
-///  encoded starting from the last segment of the SR
-///  Policy, i.e., the first element of the segment list
-///  (Segment List \[0]) contains the last segment of the
-///  SR Policy, the second element contains the
-///  penultimate segment of the SR Policy and so on.
+///   segment in the Segment List.  The Segment List is
+///   encoded starting from the last segment of the SR
+///   Policy, i.e., the first element of the segment list
+///   (Segment List \[0]) contains the last segment of the
+///   SR Policy, the second element contains the
+///   penultimate segment of the SR Policy and so on.
 ///
 /// - *Type Length Value*: A TLV provides meta-data for segment processing.  The
-///  TLVs defined in this spec are the HMAC and PAD TLVs.
+///   TLVs defined in this spec are the HMAC and PAD TLVs.
 ///
 /// # Remarks
 ///

@@ -63,34 +63,34 @@ const FLOW: u32be = u32be(u32::to_be(0xfffff));
 /// - *Version*:              4-bit Internet Protocol version number = 6.
 ///
 /// - *DSCP*:                 6-bit Differentiated services codepoint defined
-///  in [IETF RFC 2474]. Used to select the per hop
-///  behavior a packet experiences at each node.
+///   in [IETF RFC 2474]. Used to select the per hop
+///   behavior a packet experiences at each node.
 ///
 /// - *ECN*:                  2-bit Explicit congestion notification codepoint
-///  defined in [IETF RFC 3168].
+///   defined in [IETF RFC 3168].
 ///
 /// - *Flow Label*:           20-bit flow label.
 ///
 /// - *Payload Length*:       16-bit unsigned integer.  Length of the IPv6
-///  payload, i.e., the rest of the packet following
-///  this IPv6 header, in octets. (*Note* that any
-///  extension headers present are considered part of
-///  the payload, i.e., included in the length count.)
+///   payload, i.e., the rest of the packet following
+///   this IPv6 header, in octets. (*Note* that any
+///   extension headers present are considered part of
+///   the payload, i.e., included in the length count.)
 ///
 /// - *Next Header*:          8-bit selector.  Identifies the type of header
-///  immediately following the IPv6 header. Uses the
-///  same values as the IPv4 Protocol field
-///  [RFC-1700 et seq.].
+///   immediately following the IPv6 header. Uses the
+///   same values as the IPv4 Protocol field
+///   [RFC-1700 et seq.].
 ///
 /// - *Hop Limit*:            8-bit unsigned integer. Decremented by 1 by
-///  each node that forwards the packet. The packet
-///  is discarded if Hop Limit is decremented to zero.
+///   each node that forwards the packet. The packet
+///   is discarded if Hop Limit is decremented to zero.
 ///
 /// - *Source Address*:       128-bit address of the originator of the packet.
 ///
 /// - *Destination Address*:  128-bit address of the intended recipient of the
-///  packet (possibly not the ultimate recipient, if
-///  a Routing header is present).
+///   packet (possibly not the ultimate recipient, if
+///   a Routing header is present).
 ///
 /// [IETF RFC 8200]: https://tools.ietf.org/html/rfc8200#section-3
 /// [IETF RFC 2474]: https://tools.ietf.org/html/rfc2474
@@ -324,7 +324,7 @@ impl Packet for Ipv6 {
     /// the packet.
     ///
     /// * [`payload_length`] is set to the length of the payload which includes
-    /// any extension headers present.
+    ///   any extension headers present.
     ///
     /// [`payload_length`]: Ipv6::payload_length
     #[inline]

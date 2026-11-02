@@ -45,13 +45,13 @@ use std::ptr::NonNull;
 /// - *Length*:         The length of the option in units of 8 octets.
 ///
 /// - *Reserved*:       These fields are unused. They MUST be initialized
-///  to zero by the sender and MUST be ignored by the
-///  receiver.
+///   to zero by the sender and MUST be ignored by the
+///   receiver.
 ///
 /// - *IP header + data*:
-///  The original packet truncated to ensure that the
-///  size of the redirect message does not exceed 1280
-///  octets.
+///   The original packet truncated to ensure that the
+///   size of the redirect message does not exceed 1280
+///   octets.
 ///
 /// # Remarks
 ///

@@ -22,15 +22,15 @@
 //! # Port Metrics
 //!
 //! * `port.packets`, total number of successfully received or transmitted
-//! packets.
+//!   packets.
 //! * `port.octets`, total number of successfully received or transmitted
-//! bytes.
+//!   bytes.
 //! * `port.dropped`, total number of packets dropped because the receive
-//! or transmit queues are full.
+//!   or transmit queues are full.
 //! * `port.errors`, total number of erroneous received packets or packets
-//! failed to transmit.
+//!   failed to transmit.
 //! * `port.no_mbuf`, total number of packets dropped due to mbuf allocation
-//! failures.
+//!   failures.
 //!
 //! Each metric is labeled with the port name and a direction, which can be
 //! either RX or TX. `port.packets` and `port.dropped` are tracked per core
@@ -41,10 +41,10 @@
 //! # KNI Metrics
 //!
 //! * `kni.packets`, total number of successfully received or transmitted
-//! packets.
+//!   packets.
 //! * `kni.octets`, total number of successfully received or transmitted bytes.
 //! * `kni.dropped`, total number of packets dropped because the transmit
-//! queue is full.
+//!   queue is full.
 //!
 //! Each metric is labeled with the KNI interface name and a direction, which
 //! can be either RX or TX.
@@ -53,7 +53,7 @@
 //! # Mempool Metrics
 //!
 //! * `mempool.used`, total number of mbufs which have been allocated from
-//! the mempool.
+//!   the mempool.
 //! * `mempool.free`, total number of mbufs available for allocation.
 //!
 //! Each metric is labeled with the mempool name.
@@ -65,7 +65,7 @@
 //! * `pipeline.processed`, total number of successfully processed packets.
 //! * `pipeline.dropped`, total number of packets intentionally dropped.
 //! * `pipeline.errors`, total number of packet dropped due to processing
-//! errors.
+//!   errors.
 //!
 //! Each metric is tracked per core and labeled with the core id and the
 //! pipeline name. If the pipeline doesn't have a name, it will be labeled

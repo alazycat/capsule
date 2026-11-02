@@ -41,12 +41,12 @@ use std::ptr::NonNull;
 /// ```
 ///
 /// - *Reserved*:       This field is unused. It MUST be initialized to
-///  zero by the sender and MUST be ignored by the
-///  receiver.
-/// Valid Options:
+///   zero by the sender and MUST be ignored by the
+///   receiver.
+///   Valid Options:
 ///
 /// - *Source link-layer address*:
-///  The link-layer address of the sender, if known.
+///   The link-layer address of the sender, if known.
 ///
 /// [IETF RFC 4861]: https://tools.ietf.org/html/rfc4861#section-4.1
 #[derive(Icmpv6Packet)]

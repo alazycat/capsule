@@ -176,7 +176,7 @@ impl Icmpv4Message for Redirect {
     /// the packet.
     ///
     /// * the data field in the message body is trimmed if it exceeds the
-    /// [minimum IPV4 MTU].
+    ///   [minimum IPV4 MTU].
     /// * [`checksum`] is computed based on the `Redirect` message.
     ///
     /// [minimum IPv4 MTU]: IPV4_MIN_MTU

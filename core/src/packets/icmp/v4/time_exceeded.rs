@@ -151,7 +151,7 @@ impl Icmpv4Message for TimeExceeded {
     /// the packet.
     ///
     /// * the data field in the message body is trimmed if it exceeds the
-    /// [minimum IPV4 MTU], as we only need enough for port information.
+    ///   [minimum IPV4 MTU], as we only need enough for port information.
     /// * [`checksum`] is computed based on the `TimeExceeded` message.
     ///
     /// [minimum IPv4 MTU]: IPV4_MIN_MTU
