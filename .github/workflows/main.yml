@@ -167,11 +167,9 @@ jobs:
   coverage:
     runs-on: ubuntu-22.04
 
-    # tarpaulin's ptrace engine segfaults while instrumenting the test
-    # binaries once DPDK EAL performs its static hugepage mappings (the
-    # runtime test itself passes; the unit tests crash mid-run under
-    # instrumentation). Kept non-blocking until an alternative coverage
-    # tool (e.g. llvm-cov) is evaluated.
+    # Kept non-blocking for the first llvm-cov runs; the runtime tests use
+    # an EAL whose exit path interacts with the LLVM profile atexit handler
+    # and cannot be validated outside this CI environment.
     continue-on-error: true
 
     container:
@@ -204,22 +202,26 @@ jobs:
           mount -t hugetlbfs none /dev/hugepages
           grep Huge /proc/meminfo
 
+      # LLVM source-based coverage runs the tests as plain processes, so it
+      # does not hit the ptrace segfault tarpaulin had under the DPDK EAL
+      # hugepage mappings. -C instrument-coverage is stable, no nightly
+      # needed (tarpaulin's -Zpackage-features workaround also goes away).
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly
+          toolchain: stable
           override: true
+          components: llvm-tools-preview
 
-      - name: install-tarpaulin
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: --force cargo-tarpaulin
+      # install from source: taiki-e prebuilt binaries are built on a newer
+      # glibc (2.31) than the sandbox container ships (buster, 2.28).
+      - name: install-cargo-llvm-cov
+        run: cargo install cargo-llvm-cov --locked
 
-      - name: run-tarpaulin
-        uses: actions-rs/cargo@v1
-        with:
-          command: tarpaulin
-          args: "-p capsule -l --count --exclude-files examples/* ffi/* macros/* --out Xml -Zpackage-features --features full"
+      - name: run-llvm-cov
+        run: >-
+          cargo llvm-cov -p capsule --features full
+          --cobertura --output-path cobertura.xml
+          --ignore-run-fail
 
       - uses: codecov/codecov-action@v1
         with:
